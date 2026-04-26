@@ -11,7 +11,7 @@ class ReLULayer:
     def backward(self, grad_output):
         return grad_output * (self.input > 0)
     
-    
+
 class DenseLayer:
     def __init__(self, input_size, output_size):
         # веса и смещения
@@ -37,3 +37,12 @@ class DenseLayer:
         self.bias -= learning_rate * grad_bias
         
         return grad_input    
+    
+
+class SoftmaxLayer:
+    def forward(self, input):
+        exps = np.exp(input - np.max(input, axis=1, keepdims=True))
+        return exps / np.sum(exps, axis=1, keepdims=True)
+
+    def backward(self, grad_output):
+        return grad_output    
