@@ -5,7 +5,8 @@ from image_processing import preprocess_image, extract_characters, extract_and_p
 image_path = "test.png"
 
 model = NeuralNetwork()
-model.load("models/digits_model.npz")
+#model.load("models/digits_model.npz")
+model.load("models/mnist_model.npz")
 
 thresh = preprocess_image(image_path)
 boxes = extract_characters(thresh)
