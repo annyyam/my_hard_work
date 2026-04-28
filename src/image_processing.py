@@ -42,14 +42,24 @@ def extract_and_prepare(thresh, boxes):
     for (x, y, w, h) in boxes:
         char = thresh[y:y+h, x:x+w]
 
-        # изменение размера до 20x20
-        char = cv2.resize(char, (20, 20))
+        # делаем квадрат
+        size = max(w, h)
+        square = np.zeros((size, size))
+
+        # центрируем символ в квадрате
+        x_offset = (size - w) // 2
+        y_offset = (size - h) // 2
+
+        square[y_offset:y_offset+h, x_offset:x_offset+w] = char
+
+        # уменьшаем до 20x20
+        char_resized = cv2.resize(square, (20, 20))
 
         # создаём 28x28
         canvas = np.zeros((28, 28))
 
         # вставляем в центр
-        canvas[4:24, 4:24] = char
+        canvas[4:24, 4:24] = char_resized
 
         # нормализация
         canvas = canvas / 255.0
