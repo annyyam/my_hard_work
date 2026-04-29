@@ -6,8 +6,10 @@ from model import NeuralNetwork
 from image_processing import preprocess_image, extract_characters, extract_and_prepare
 
 
-model = NeuralNetwork()
-model.load("models/mnist_model.npz")
+model = NeuralNetwork(num_classes=26)
+model.load("models/emnist_letters_model.npz")
+# model = NeuralNetwork()
+# model.load("models/mnist_model.npz")
 
 
 def load_image():
@@ -33,7 +35,8 @@ def load_image():
 
     for char in chars:
         pred = model.predict(char)[0]
-        result += str(pred)
+        result += chr(pred + ord("A"))
+        #result += str(pred)
 
     result_label.config(text="Результат: " + result)
 
