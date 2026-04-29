@@ -121,3 +121,59 @@ class ConvLayer:
         self.bias -= self.learning_rate * grad_bias
 
         return grad_input    
+    
+
+    
+class MaxPoolingLayer:
+    def __init__(self, pool_size=2, stride=2):
+        self.pool_size = pool_size
+        self.stride = stride
+        self.input = None
+        self.max_indices = None
+
+    def forward(self, input):
+        self.input = input
+
+        batch_size, channels, height, width = input.shape
+
+        output_height = height // self.pool_size
+        output_width = width // self.pool_size
+
+        output = np.zeros((batch_size, channels, output_height, output_width))
+        self.max_indices = {}
+
+        for b in range(batch_size):
+            for c in range(channels):
+                for i in range(output_height):
+                    for j in range(output_width):
+                        h_start = i * self.stride
+                        h_end = h_start + self.pool_size
+                        w_start = j * self.stride
+                        w_end = w_start + self.pool_size
+
+                        region = input[b, c, h_start:h_end, w_start:w_end]
+                        max_value = np.max(region)
+
+                        output[b, c, i, j] = max_value
+
+                        max_index = np.unravel_index(np.argmax(region), region.shape)
+                        self.max_indices[(b, c, i, j)] = (
+                            h_start + max_index[0],
+                            w_start + max_index[1]
+                        )
+
+        return output
+
+    def backward(self, grad_output):
+        grad_input = np.zeros_like(self.input)
+
+        batch_size, channels, output_height, output_width = grad_output.shape
+
+        for b in range(batch_size):
+            for c in range(channels):
+                for i in range(output_height):
+                    for j in range(output_width):
+                        h_index, w_index = self.max_indices[(b, c, i, j)]
+                        grad_input[b, c, h_index, w_index] = grad_output[b, c, i, j]
+
+        return grad_input    
