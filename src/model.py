@@ -62,6 +62,36 @@ class CNN:
     def predict(self, x):
         probs = self.forward(x)
         return np.argmax(probs, axis=1)
+    
+    
+    def save(self, path):
+        np.savez(
+            path,
+            conv1_w=self.conv1.weights,
+            conv1_b=self.conv1.bias,
+            conv2_w=self.conv2.weights,
+            conv2_b=self.conv2.bias,
+            fc1_w=self.fc1.weights,
+            fc1_b=self.fc1.bias,
+            fc2_w=self.fc2.weights,
+            fc2_b=self.fc2.bias
+        )
+
+    def load(self, path):
+        data = np.load(path)
+
+        self.conv1.weights = data["conv1_w"]
+        self.conv1.bias = data["conv1_b"]
+
+        self.conv2.weights = data["conv2_w"]
+        self.conv2.bias = data["conv2_b"]
+
+        self.fc1.weights = data["fc1_w"]
+        self.fc1.bias = data["fc1_b"]
+
+        self.fc2.weights = data["fc2_w"]
+        self.fc2.bias = data["fc2_b"]    
+    
 
 
 # import numpy as np

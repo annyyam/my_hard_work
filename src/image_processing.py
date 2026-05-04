@@ -37,21 +37,20 @@ def preprocess_image(image_path):
 
 
 def extract_characters(thresh):
-    # ищем контуры
-    contours, _ = cv2.findContours(
-        thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     boxes = []
 
     for cnt in contours:
         x, y, w, h = cv2.boundingRect(cnt)
 
-        # фильтр мусора
-        if w > 5 and h > 5:
-            boxes.append((x, y, w, h))
+        # ФИЛЬТР МУСОРА
+        if w < 10 or h < 10:
+            continue
 
-    # сортировка слева направо
+        boxes.append((x, y, w, h))
+
+    # сортируем слева направо
     boxes = sorted(boxes, key=lambda b: b[0])
 
     return boxes

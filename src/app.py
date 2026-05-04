@@ -2,12 +2,12 @@ import tkinter as tk
 from tkinter import filedialog
 from PIL import Image, ImageTk
 
-from model import NeuralNetwork
+from model import CNN
 from image_processing import preprocess_image, extract_characters, extract_and_prepare
 
 
-model = NeuralNetwork(num_classes=26)
-model.load("models/emnist_letters_model.npz")
+model = CNN(num_classes=26)
+model.load("models/emnist_cnn_letters_model.npz")
 # model = NeuralNetwork()
 # model.load("models/mnist_model.npz")
 
@@ -32,13 +32,29 @@ def load_image():
     chars = extract_and_prepare(thresh, boxes)
 
     result = ""
+    details = []
 
     for char in chars:
-        pred = model.predict(char)[0]
+        probs = model.forward(char)[0]
+
+        top_indexes = probs.argsort()[-3:][::-1]
+
+        top_letters = []
+        for idx in top_indexes:
+            letter = chr(idx + ord("A"))
+            percent = probs[idx] * 100
+            top_letters.append(f"{letter} ({percent:.1f}%)")
+
+        pred = top_indexes[0]
         result += chr(pred + ord("A"))
-        #result += str(pred)
+
+        details.append(", ".join(top_letters))
 
     result_label.config(text="Результат: " + result)
+
+    print("Top-3 по символам:")
+    for i, d in enumerate(details):
+        print(f"Символ {i + 1}: {d}")
 
 
 root = tk.Tk()
