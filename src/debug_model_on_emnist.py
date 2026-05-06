@@ -21,7 +21,6 @@ def load_images(path):
 
         # та же ориентвция, что и при обучении
         images = np.transpose(images, (0, 2, 1))
-        images = np.flip(images, axis=1)
 
         return images.reshape(num, rows * cols) / 255.0
 

@@ -11,15 +11,11 @@ TRAIN_IMAGES = os.path.join(DATA_DIR, "emnist-letters-train-images-idx3-ubyte.gz
 TRAIN_LABELS = os.path.join(DATA_DIR, "emnist-letters-train-labels-idx1-ubyte.gz")
 
 
-def load_images(path):
+def load_raw_images(path):
     with gzip.open(path, "rb") as f:
         magic, num, rows, cols = struct.unpack(">IIII", f.read(16))
         data = np.frombuffer(f.read(), dtype=np.uint8)
-        images = data.reshape(num, rows, cols)
-
-        images = np.transpose(images, (0, 2, 1))
-
-        return images / 255.0
+        return data.reshape(num, rows, cols) / 255.0
 
 
 def load_labels(path):
@@ -29,18 +25,32 @@ def load_labels(path):
         return labels - 1
 
 
-images = load_images(TRAIN_IMAGES)
+images = load_raw_images(TRAIN_IMAGES)
 labels = load_labels(TRAIN_LABELS)
 
 target_letter = "A"
 target_index = ord(target_letter) - ord("A")
 
-indexes = np.where(labels == target_index)[0][:12]
+image_index = np.where(labels == target_index)[0][0]
+img = images[image_index]
 
-for plot_index, image_index in enumerate(indexes):
-    plt.subplot(3, 4, plot_index + 1)
-    plt.imshow(images[image_index], cmap="gray")
-    plt.title(target_letter)
+variants = {
+    "raw": img,
+    "transpose only": img.T,
+    "transpose + flip left/right": np.fliplr(img.T),
+    "transpose + flip up/down": np.flipud(img.T),
+    "rot90": np.rot90(img),
+    "rot90 + fliplr": np.fliplr(np.rot90(img)),
+    "rot90 + flipud": np.flipud(np.rot90(img)),
+}
+
+plt.figure(figsize=(12, 6))
+
+for i, (name, variant) in enumerate(variants.items()):
+    plt.subplot(2, 4, i + 1)
+    plt.imshow(variant, cmap="gray")
+    plt.title(name)
     plt.axis("off")
 
+plt.tight_layout()
 plt.show()

@@ -121,6 +121,13 @@ def extract_and_prepare(thresh, boxes):
 
         char_resized = cv2.resize(char, (new_w, new_h))
 
+        # немного утолщаем линии, чтобы символы были похожи на EMNIST
+        kernel = np.ones((2, 2), np.uint8)
+        char_resized = cv2.dilate(char_resized, kernel, iterations=1)
+        
+        # слегка сглаживаем края, как у обучающих изображений
+        char_resized = cv2.GaussianBlur(char_resized, (3, 3), 0)
+
         canvas = np.zeros((28, 28))
 
         x_offset = (28 - new_w) // 2

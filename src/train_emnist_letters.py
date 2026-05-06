@@ -143,9 +143,7 @@ def load_images(path):
         data = np.frombuffer(f.read(), dtype=np.uint8)
         images = data.reshape(num, rows, cols)
 
-        # исправляем ориентацию
         images = np.transpose(images, (0, 2, 1))
-        images = np.flip(images, axis=1)
 
         return images.reshape(num, rows * cols) / 255.0
 

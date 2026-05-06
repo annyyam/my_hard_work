@@ -12,6 +12,7 @@ model.load("models/emnist_cnn_letters_model.npz")
 # model.load("models/mnist_model.npz")
 
 
+
 def load_image():
     file_path = filedialog.askopenfilename()
 
