@@ -118,12 +118,17 @@ def extract_and_prepare(thresh, boxes):
             M = np.float32([[1, 0, shift_x], [0, 1, shift_y]])
             char_resized = cv2.warpAffine(char_resized, M, (20, 20))
 
-        # создаём 28x28
+
         canvas = np.zeros((28, 28))
         canvas[4:24, 4:24] = char_resized
-
-        # нормализация
         canvas = canvas / 255.0
+
+        # # создаём 28x28
+        # canvas = np.zeros((28, 28))
+        # canvas[4:24, 4:24] = char_resized
+
+        # # нормализация
+        # canvas = canvas / 255.0
 
         characters.append(canvas.reshape(1, 784))
 

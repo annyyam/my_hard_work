@@ -16,10 +16,9 @@ def load_images(path):
         magic, num, rows, cols = struct.unpack(">IIII", f.read(16))
         data = np.frombuffer(f.read(), dtype=np.uint8)
         images = data.reshape(num, rows, cols)
-
-        # текущая обработка, как в train_emnist_letters.py
+        
         images = np.transpose(images, (0, 2, 1))
-        images = np.flip(images, axis=2)
+        images = np.flip(images, axis=1)
 
         return images / 255.0
 
