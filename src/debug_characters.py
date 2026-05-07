@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from image_processing import preprocess_image, extract_characters, extract_and_prepare
 
 
-image_path = "testBIG.png"
+image_path = "jlmno.png"
 
 thresh = preprocess_image(image_path)
 boxes = extract_characters(thresh)

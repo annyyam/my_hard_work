@@ -56,25 +56,108 @@ def preprocess_image(image_path):
 
 #     return thresh
 
-
 def extract_characters(thresh):
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    boxes = []
+    raw_boxes = []
 
     for cnt in contours:
         x, y, w, h = cv2.boundingRect(cnt)
+        area = w * h
 
-        # ФИЛЬТР МУСОРА
-        if w < 10 or h < 10:
+        # совсем мелкий мусор убираем
+        if area < 20:
             continue
 
-        boxes.append((x, y, w, h))
+        raw_boxes.append((x, y, w, h))
 
-    # сортируем слева направо
-    boxes = sorted(boxes, key=lambda b: b[0])
+    if not raw_boxes:
+        return []
 
-    return boxes
+    # ориентируемся на самый высокий объект как на высоту обычной буквы
+    max_h = max(h for x, y, w, h in raw_boxes)
+    max_area = max(w * h for x, y, w, h in raw_boxes)
+
+    big_boxes = []
+    small_boxes = []
+
+    for x, y, w, h in raw_boxes:
+        area = w * h
+
+        # маленькие элементы: точки над i/j
+        if h < max_h * 0.45 and area < max_area * 0.30:
+            small_boxes.append((x, y, w, h))
+        else:
+            big_boxes.append((x, y, w, h))
+
+    # присоединяем маленькие элементы к ближайшей основной букве
+    for sx, sy, sw, sh in small_boxes:
+        s_center_x = sx + sw / 2
+        s_center_y = sy + sh / 2
+
+        best_index = None
+        best_score = 10**9
+
+        for i, (x, y, w, h) in enumerate(big_boxes):
+            b_center_x = x + w / 2
+
+            # точка должна быть примерно над буквой или в верхней её части
+            if s_center_y > y + h * 0.65:
+                continue
+
+            # точка должна быть по горизонтали рядом с буквой
+            if not (x - 25 <= s_center_x <= x + w + 25):
+                continue
+
+            horizontal_distance = abs(b_center_x - s_center_x)
+            vertical_distance = abs(y - (sy + sh))
+
+            score = horizontal_distance + vertical_distance * 0.5
+
+            if score < best_score:
+                best_score = score
+                best_index = i
+
+        if best_index is not None:
+            x, y, w, h = big_boxes[best_index]
+
+            new_x = min(x, sx)
+            new_y = min(y, sy)
+            new_right = max(x + w, sx + sw)
+            new_bottom = max(y + h, sy + sh)
+
+            big_boxes[best_index] = (
+                new_x,
+                new_y,
+                new_right - new_x,
+                new_bottom - new_y
+            )
+
+        # если маленький элемент не удалось присоединить,
+        # считаем его шумом и не добавляем отдельно
+
+    big_boxes = sorted(big_boxes, key=lambda b: b[0])
+
+    return big_boxes
+
+# def extract_characters(thresh):
+#     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+#     boxes = []
+
+#     for cnt in contours:
+#         x, y, w, h = cv2.boundingRect(cnt)
+
+#         # ФИЛЬТР МУСОРА
+#         if w < 10 or h < 10:
+#             continue
+
+#         boxes.append((x, y, w, h))
+
+#     # сортируем слева направо
+#     boxes = sorted(boxes, key=lambda b: b[0])
+
+#     return boxes
 
 
 # def extract_and_prepare(thresh, boxes):
